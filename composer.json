@@ -1,0 +1,21 @@
+{
+    "name": "nimbly/announce",
+    "description": "Event dispatcher and subscribers",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Brent Scheffler",
+            "email": "brent@nimbly.io"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Announce\\": "src"
+        },
+        "files": [
+            "src\/functions.php"
+        ]
+    }
+}
