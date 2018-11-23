@@ -1,5 +1,5 @@
 {
-    "name": "nimbly/announce",
+    "name": "nimbly\/announce",
     "description": "Event dispatcher and subscribers",
     "type": "library",
     "license": "MIT",
@@ -17,5 +17,6 @@
         "files": [
             "src\/functions.php"
         ]
-    }
+    },
+    "version": "0.1.0"
 }
