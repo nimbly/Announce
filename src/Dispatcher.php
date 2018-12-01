@@ -54,6 +54,10 @@ class Dispatcher
 
             foreach( $this->subscriptions[$event->getName()] as $handler ){
 
+                if( !$event->shouldPropagate() ){
+                    break;
+                }
+
                 // Closure/invokable
                 if( is_callable($handler) ){
                     $handler($event);

@@ -8,6 +8,70 @@ A simple framework agnostic Event dispatcher for your event-driven application.
 composer require nimbly/announce
 ```
 
+### Quick start
+
+1) Create your event.
+
+```php
+class UserRegisteredEvent extends Announce\Event
+{
+    public $user;
+
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+    }
+}
+```
+
+2) Create your subscriber.
+
+```php
+class NotificationSubscriber extends Announce\Subscriber
+{
+    public function sendWelcomeEmail(UserRegisteredEvent $userRegisteredEvent)
+    {
+        Email::to($userRegisteredEvent->user->email)->send("welcome");
+    }
+
+    public function sendInvitationEmail(UserInvitedEvent $userInvitedEvent)
+    {
+        Email::to($userInvitedEvent->user->email)->send("invitation");
+    }
+
+    public function subscribe(Announce\Dispatcher $dispatcher)
+    {
+        $dispatcher->listen(
+            UserRegisteredEvent::class,
+            [$this, "sendWelcomeEmail"]
+        );
+
+        $dispatcher->listen(
+            UserInvitedEvent::class,
+            [$this, "sendWelcomeEmail"]
+        );
+    }
+}
+```
+
+3) Bootstrap.
+
+```php
+$dispatcher = new Announce\Dispatcher;
+$dispatcher->register([
+    NotificationSubscriber::class,
+    CacheSubscriber::class,
+]);
+
+Container::set(Announce\Dispatcher::class, $dispatcher);
+```
+
+4) Trigger events from your application code.
+
+```php
+Container::get(Announce\Dispatcher::class)->trigger(new UserRegisteredEvent($user));
+```
+
 ### Dispatcher
 
 The ```Dispatcher``` is at the core of managing subscribers, handlers, and triggering events. It is usually best practice to attach an instance of the ```Dispatcher``` to your dependency injection container for later use in your application code (see **Triggering events** section).
@@ -151,4 +215,16 @@ To trigger an event in your code, simply call the ```trigger``` method on the ``
 ```php
 $dispatcher = Container::get(Announce\Dispatcher::class);
 $dispatcher->trigger(new UserRegisteredEvent($user));
+```
+
+### Stopping event propagation
+If you need to stop event propagation during its lifetime, just call the ```stopPropagation()``` method on the event instance. The event will no longer be propagated to any subscribed listeners.
+
+```php
+function eventHandler(UserRegisteredEvent $event)
+{
+    Email::send("welcome")->to($event->user->email);
+
+    $event->stopPropagation();
+}
 ```
