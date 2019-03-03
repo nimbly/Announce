@@ -24,7 +24,7 @@ abstract class Event
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         if( empty($this->name) ){
             return static::class;
@@ -38,7 +38,7 @@ abstract class Event
      *
      * @return boolean
      */
-    public function shouldPropagate()
+    public function shouldPropagate(): bool
     {
         return $this->shouldPropagate;
     }
@@ -48,7 +48,7 @@ abstract class Event
      *
      * @return void
      */
-    public function stopPropagation()
+    public function stopPropagation(): void
     {
         $this->shouldPropagate = false;
     }

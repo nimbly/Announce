@@ -17,5 +17,5 @@ abstract class Subscriber
      * @param Dispatcher $dispatcher
      * @return void
      */
-    abstract public function subscribe(Dispatcher $dispatcher);
+    abstract public function register(Dispatcher $dispatcher): void;
 }

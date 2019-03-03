@@ -6,32 +6,32 @@ namespace Announce;
 class Dispatcher
 {
     /**
-     * Registered subscribers, indexed by event name
+     * Registered subscribers, indexed by event name.
      *
-     * @var array
+     * @var array<string, array>
      */
     protected $subscriptions = [];
 
     /**
-     * Register subscriptions
+     * Register subscribers.
      *
-     * @param array $subscriptions
+     * @param array<string> $subscribers
      * @return void
      */
-    public function register(array $subscribers)
+    public function register(array $subscribers): void
     {
         foreach( $subscribers as $subscriber ){
-            call_user_func([new $subscriber, 'subscribe'], $this);
+            call_user_func([new $subscriber, 'register'], $this);
         }
     }
 
     /**
-     * Register a listener to an event name(s)
+     * Register an event name(s) to a listener.
      *
-     * @param string|array $eventName
+     * @param string|array<string> $eventName
      * @param callable $handler
      */
-    public function listen($eventName, $handler)
+    public function listen($eventName, callable $handler): void
     {
         if( !is_array($eventName) ){
             $eventName = [$eventName];
@@ -43,11 +43,11 @@ class Dispatcher
     }
 
     /**
-     * Trigger an event
+     * Trigger an event.
      *
      * @param Event $event
      */
-    public function trigger(Event $event)
+    public function trigger(Event $event): void
     {
         if( array_key_exists($event->getName(), $this->subscriptions) &&
             is_array($this->subscriptions[$event->getName()]) ){
@@ -58,15 +58,12 @@ class Dispatcher
                     break;
                 }
 
-                // Closure/invokable
-                if( is_callable($handler) ){
-                    $handler($event);
+                if( !is_callable($handler) ){
+                    throw new \Exception("Event handler is not callable.");
                 }
 
-                // Class@method
-                if( ($callable = class_method($handler)) ){
-                    call_user_func($callable, $event);
-                }
+                call_user_func($handler, $event);
+
             }
         }
     }
