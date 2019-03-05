@@ -1,9 +1,16 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Announce;
 
+use Announce\Event;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\EventDispatcher\ListenerProviderInterface;
+use Psr\EventDispatcher\StoppableEventInterface;
 
-class Dispatcher
+/**
+ * @package Announce
+ */
+class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 {
     /**
      * Registered subscribers, indexed by event name.
@@ -43,33 +50,64 @@ class Dispatcher
     }
 
     /**
-     * Trigger an event.
-     *
-     * @param Event $event
+     * @inheritDoc
      */
-    public function trigger(Event $event, bool $shouldBroadcast = true): void
+    public function dispatch(object $event): object
     {
-        if( array_key_exists($event->getName(), $this->subscriptions) &&
-            is_array($this->subscriptions[$event->getName()]) ){
+        foreach( $this->getListenersForEvent($event) as $handler ){
 
-            foreach( $this->subscriptions[$event->getName()] as $handler ){
-
-                if( !$event->shouldPropagate() ){
-                    break;
-                }
-
-                if( !is_callable($handler) ){
-                    throw new \Exception("Event handler is not callable.");
-                }
-
-                call_user_func($handler, $event);
-
-                if( $shouldBroadcast &&
-                    $event instanceof Broadcaster ){
-
-                    call_user_func([$event, "broadcast"]);
-                }
+            if( $this->shouldPropagationStop($event) ){
+                break;
             }
+
+            call_user_func($handler, $event);
         }
+
+        $this->broadcastEvent($event);
+
+        return $event;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getListenersForEvent(object $event): iterable
+    {
+        if( $event instanceof Event ){
+            $eventName = $event->getName();
+        }
+        else {
+            $eventName = get_class($event);
+        }
+
+        return $this->subscriptions[$eventName] ?? [];
+    }
+
+    /**
+     * Broadcast the event, if applicable.
+     *
+     * @param object $event
+     * @return void
+     */
+    protected function broadcastEvent(object $event): void
+    {
+        if( $event instanceof BroadcastableEvent ){
+            call_user_func([$event, 'broadcast']);
+        }
+    }
+
+    /**
+     * Should event propagation stop?
+     *
+     * @param object $event
+     * @return boolean
+     */
+    protected function shouldPropagationStop(object $event): bool
+    {
+        if( $event instanceof StoppableEventInterface ) {
+            return $event->isPropagationStopped();
+        }
+
+        return false;
     }
 }

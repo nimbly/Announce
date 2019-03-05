@@ -1,12 +1,14 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Announce;
 
+use Psr\EventDispatcher\StoppableEventInterface;
 
-abstract class Event
+
+abstract class Event implements StoppableEventInterface
 {
     /**
-     * Event name - defaults to class name.
+     * Override default event name.
      *
      * @var string
      */
@@ -17,7 +19,7 @@ abstract class Event
      *
      * @var boolean
      */
-    protected $shouldPropagate = true;
+    protected $stopPropagation = false;
 
     /**
      * Get event name
@@ -26,11 +28,7 @@ abstract class Event
      */
     public function getName(): string
     {
-        if( empty($this->name) ){
-            return static::class;
-        }
-
-        return $this->name;
+        return $this->name ?? static::class;
     }
 
     /**
@@ -38,9 +36,9 @@ abstract class Event
      *
      * @return boolean
      */
-    public function shouldPropagate(): bool
+    public function isPropagationStopped(): bool
     {
-        return $this->shouldPropagate;
+        return $this->stopPropagation;
     }
 
     /**
@@ -48,8 +46,8 @@ abstract class Event
      *
      * @return void
      */
-    public function stopPropagation(): void
+    public function stop(): void
     {
-        $this->shouldPropagate = false;
+        $this->stopPropagation = true;
     }
 }

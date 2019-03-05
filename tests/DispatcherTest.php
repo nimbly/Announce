@@ -3,9 +3,9 @@
 namespace Announce\Tests;
 
 use Announce\Dispatcher;
-use Announce\Tests\src\Events\TestEvent;
-use Announce\Tests\src\Subject;
-use Announce\Tests\src\Subscribers\TestSubscriber;
+use Announce\Tests\Mock\Events\UnnamedEvent;
+use Announce\Tests\Mock\Subject;
+use Announce\Tests\Mock\Subscribers\TestSubscriber;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,7 +24,7 @@ class DispatcherTest extends TestCase
         $test = new Subject;
         $this->assertFalse($test->flag);
 
-        $dispatcher->trigger(new TestEvent($test));
+        $dispatcher->dispatch(new UnnamedEvent($test));
 
         $this->assertTrue($test->flag);
     }
@@ -35,13 +35,13 @@ class DispatcherTest extends TestCase
 
         $test = false;
 
-        $dispatcher->listen(TestEvent::class, function(TestEvent $testEvent) use (&$test) {
+        $dispatcher->listen(UnnamedEvent::class, function(UnnamedEvent $testEvent) use (&$test) {
 
             $test = true;
 
         });
 
-        $dispatcher->trigger(new TestEvent(new Subject));
+        $dispatcher->dispatch(new UnnamedEvent(new Subject));
 
         $this->assertTrue($test);
     }
@@ -56,11 +56,11 @@ class DispatcherTest extends TestCase
         $test = new Subject;
         $this->assertFalse($test->flag);
 
-        $event = new TestEvent($test);
+        $event = new UnnamedEvent($test);
 
-        $dispatcher->trigger($event);
+        $dispatcher->dispatch($event);
 
-        $this->assertFalse($event->shouldPropagate());
+        $this->assertTrue($event->isPropagationStopped());
         $this->assertEquals("Joe Tester", $test->name);
     }
 }

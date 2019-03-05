@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Announce;
 
@@ -7,7 +7,7 @@ use Announce\Dispatcher;
 abstract class Subscriber
 {
     /**
-     * Register handlers with Dispatcher.
+     * Register Subscriber handlers with Dispatcher.
      * 
      * $dispatcher->listen(
      *      SomeEvent::class,

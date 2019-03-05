@@ -2,9 +2,9 @@
 
 namespace Announce\Tests;
 
-use Announce\Tests\src\Events\NamedEvent;
-use Announce\Tests\src\Events\TestEvent;
-use Announce\Tests\src\Subject;
+use Announce\Tests\Mock\Events\NamedEvent;
+use Announce\Tests\Mock\Events\UnnamedEvent;
+use Announce\Tests\Mock\Subject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -14,8 +14,8 @@ class EventTest extends TestCase
 {
     public function test_default_event_name()
     {
-        $event = new TestEvent(new Subject);
-        $this->assertEquals(TestEvent::class, $event->getName());
+        $event = new UnnamedEvent(new Subject);
+        $this->assertEquals(UnnamedEvent::class, $event->getName());
     }
 
     public function test_custom_event_name()

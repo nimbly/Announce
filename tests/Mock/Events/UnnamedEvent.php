@@ -1,12 +1,12 @@
 <?php
 
-namespace Announce\Tests\src\Events;
+namespace Announce\Tests\Mock\Events;
 
-use Announce\Broadcaster;
+use Announce\BroadcastableEvent;
 use Announce\Event;
-use Announce\Tests\src\Subject;
+use Announce\Tests\Mock\Subject;
 
-class TestEvent extends Event implements Broadcaster
+class UnnamedEvent extends Event
 {
     /**
      * @var Subject
@@ -21,10 +21,5 @@ class TestEvent extends Event implements Broadcaster
     public function __construct(Subject $subject)
     {
         $this->subject = $subject;
-    }
-
-    public function broadcast(): void
-    {
-        //
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Announce\Tests\src;
+namespace Announce\Tests\Mock;
 
 class Subject
 {

@@ -1,20 +1,20 @@
 <?php
 
-namespace Announce\Tests\src\Subscribers;
+namespace Announce\Tests\Mock\Subscribers;
 
 use Announce\Dispatcher;
 use Announce\Subscriber;
-use Announce\Tests\src\Events\TestEvent;
+use Announce\Tests\Mock\Events\UnnamedEvent;
 
 class TestSubscriber extends Subscriber
 {
-    public function shouldStopPropagation(TestEvent $testEvent)
+    public function shouldStopPropagation(UnnamedEvent $testEvent)
     {
         $testEvent->subject->flag = true;
-        $testEvent->stopPropagation();
+        $testEvent->stop();
     }
 
-    public function convertNameToUppercase(TestEvent $testEvent)
+    public function convertNameToUppercase(UnnamedEvent $testEvent)
     {
         $testEvent->subject->name = strtoupper($testEvent->subject->name);
     }
@@ -22,12 +22,12 @@ class TestSubscriber extends Subscriber
     public function register(Dispatcher $dispatcher): void
     {
         $dispatcher->listen(
-            TestEvent::class,
+            UnnamedEvent::class,
             [$this, 'shouldStopPropagation']
         );
 
         $dispatcher->listen(
-            TestEvent::class,
+            UnnamedEvent::class,
             [$this, 'convertNameToUppercase']
         );
     }

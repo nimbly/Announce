@@ -1,6 +1,7 @@
 {
     "name": "nimbly\/announce",
     "description": "Event dispatcher and subscribers",
+    "version": "0.1.0",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -10,22 +11,22 @@
         }
     ],
     "require": {
-        "php": ">=7.2"
+        "php": ">=7.2",
+        "psr/event-dispatcher": "^0.7.0"
     },
     "autoload": {
         "psr-4": {
             "Announce\\": "src"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Announce\\Tests\\": "tests"
-        }
-    },
-    "version": "0.1.0",
     "require-dev": {
         "phpunit/phpunit": "^8.0",
         "vimeo/psalm": "^3.1",
         "php-coveralls/php-coveralls": "^2.1"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Announce\\Tests\\": "tests"
+        }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Announce\Tests\src\Events;
+namespace Announce\Tests\Mock\Events;
 
 use Announce\Event;
 
