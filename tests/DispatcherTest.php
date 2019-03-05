@@ -3,6 +3,7 @@
 namespace Announce\Tests;
 
 use Announce\Dispatcher;
+use Announce\Tests\Mock\Events\ObjectEvent;
 use Announce\Tests\Mock\Events\UnnamedEvent;
 use Announce\Tests\Mock\Subject;
 use Announce\Tests\Mock\Subscribers\TestSubscriber;
@@ -62,5 +63,24 @@ class DispatcherTest extends TestCase
 
         $this->assertTrue($event->isPropagationStopped());
         $this->assertEquals("Joe Tester", $test->name);
+    }
+
+    public function test_generic_object_as_event()
+    {
+        $dispatcher = new Dispatcher;
+
+        $test = false;
+        $dispatcher->listen(
+            ObjectEvent::class,
+            function(ObjectEvent $event) use (&$test) {
+
+                $test = true;
+
+            }
+        );
+
+        $dispatcher->dispatch(new ObjectEvent);
+
+        $this->assertTrue($test);
     }
 }
