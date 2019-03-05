@@ -1,16 +1,16 @@
-## Announce
+# Announce
 
-A simple framework agnostic Event dispatcher for your event-driven application.
+A simple framework agnostic PSR-14 event dispatcher for your event-driven application.
 
-### Installation
+## Installation
 
 ```bash
 composer require nimbly/announce
 ```
 
-### Quick start
+## Quick start
 
-1) Create your event.
+### Create an event class
 
 ```php
 class UserRegisteredEvent extends Announce\Event
@@ -24,71 +24,33 @@ class UserRegisteredEvent extends Announce\Event
 }
 ```
 
-2) Create your subscriber.
-
-```php
-class NotificationSubscriber extends Announce\Subscriber
-{
-    public function sendWelcomeEmail(UserRegisteredEvent $userRegisteredEvent)
-    {
-        Email::to($userRegisteredEvent->user->email)->send("welcome");
-    }
-
-    public function sendInvitationEmail(UserInvitedEvent $userInvitedEvent)
-    {
-        Email::to($userInvitedEvent->user->email)->send("invitation");
-    }
-
-    public function subscribe(Announce\Dispatcher $dispatcher)
-    {
-        $dispatcher->listen(
-            UserRegisteredEvent::class,
-            [$this, "sendWelcomeEmail"]
-        );
-
-        $dispatcher->listen(
-            UserInvitedEvent::class,
-            [$this, "sendWelcomeEmail"]
-        );
-    }
-}
-```
-
-3) Bootstrap.
-
+### Add a listener and bind dispatcher to Container.
 ```php
 $dispatcher = new Announce\Dispatcher;
-$dispatcher->register([
-    NotificationSubscriber::class,
-    CacheSubscriber::class,
-]);
+
+$dispatcher->listen(
+    UserRegisteredEvent::class,
+    function(UserRegisteredEvent $event) {
+
+        Log::debug("Handling UserRegistered event.");
+
+    }
+);
 
 Container::set(Announce\Dispatcher::class, $dispatcher);
 ```
 
-4) Trigger events from your application code.
 
+### Dispatch event from your application code
 ```php
-Container::get(Announce\Dispatcher::class)->trigger(new UserRegisteredEvent($user));
+Container::get(Announce\Dispatcher::class)->dispatch(new UserRegisteredEvent($user));
 ```
 
-### Dispatcher
-
-The ```Dispatcher``` is at the core of managing subscribers, handlers, and triggering events. It is usually best practice to attach an instance of the ```Dispatcher``` to your dependency injection container for later use in your application code (see **Triggering events** section).
-
-```php
-$dispatcher = new Announce\Dispatcher;
-Container::set(Announce\Dispatcher::class, $dispatcher);
-```
-
-### Events
-
-Events are classes that represent some important or significant "event" that has taken place within your application code. This event can be anything you like: a new user registering an account, a user updating their address, a session being destroyed, etc.
+## Events
+Events are classes that represent some important or significant "event" that has taken place within your application code. This event can be anything you like: a new user registering an account, a user updating their address, a session being destroyed, etc - but usually represent some sort of state-change.
 
 Usually (but not always), you'll want to pass along something *in to* the event that your event handlers will need to do their job. You can use the ```Event``` instance to capture that data.
 
-Extend your event classes from ```Announce\Event```.
-
 ```php
 class UserRegisteredEvent extends Announce\Event
 {
@@ -99,13 +61,73 @@ class UserRegisteredEvent extends Announce\Event
         $this->user = $user;
     }
 }
+```
+
+## Listening for events
+
+Call the dispatcher's ```listen``` method to bind an Event (or set of Events) to a handler.
+
+```php
+// Register a listener to the current instance's sendRegistrationEmail method.
+
+$dispatcher->listen(
+    UserRegisteredEvent::class,
+    [$this, 'sendRegistrationEmail']
+);
+```
+
+```php
+// Register a listener to a closure.
+
+$dispatcher->listen(
+    UserRegisteredEvent::class,
+    function(UserRegisteredEvent $event) {
+
+        // Send email...
+
+    }
+);
+
+```
+
+```php
+// Register a listener to a function.
+
+function sendRegistrationEmail(UserRegisteredEvent $event)
+{
+    // Send email....
+}
+
+$dispatcher->listen(
+    UserRegisteredEvent::class,
+    'sendRegistrationEmail'
+);
+```
+
+## Accessing the dispatcher
+
+It is usually best practice to attach your instance of the ```Dispatcher``` to your dependency injection container for later use in your application code (see **Dispatching events** section).
+
+```php
+$dispatcher = new Announce\Dispatcher;
+
+$dispatcher->listen(
+    UserRegisteredEvent::class,
+    function(UserRegisteredEvent $event) {
+
+        // Send email...
+
+    }
+);
+
+Container::set(Announce\Dispatcher::class, $dispatcher);
 ```
 
 ### Handlers
 
-Handlers are the methods or functions that handle a triggered ```Event```. A handler can be a method on a class, a ```closure```, or any ```callable```.
+Handlers are the methods or functions that handle a dispatched ```Event```. A handler can be a method on a class, a ```closure```, or any other thing of type ```callable```.
 
-The ```Dispatcher``` will always pass the ```Event``` instance into the handler as a parameter.
+The ```Dispatcher``` will always pass the ```Event``` instance into the handler as the only parameter.
 
 ```php
 function sendEmail(UserRegisteredEvent $userRegisteredEvent)
@@ -118,9 +140,9 @@ function sendEmail(UserRegisteredEvent $userRegisteredEvent)
 
 Subscribers are classes that register one or more events to a handler. Subscribers are a great way to organize all related handlers into a single class: i.e. manage a single area of concern.
 
-Subscribers must extend from ```Announce\Subscriber``` and implement the ```subscribe``` method. The ```subscribe``` method accepts the ```Dispatcher``` instance as its only parameter.
+Subscribers must extend from ```Announce\Subscriber``` and implement the ```register``` method. The ```register``` method accepts the ```Dispatcher``` instance as its only parameter.
 
-The ```subscribe``` method can then use the ```Dispatcher``` instance to listen to any number of events.
+The ```register``` method can then use the ```Dispatcher``` instance to listen to any number of events.
 
 ```php
 class NotificationSubscriber extends Announce\Subscriber
@@ -176,7 +198,7 @@ $dispatcher->register([
 
 ### Registering listeners
 
-You may opt to bypass subscribers altogther and simply attach your own handlers ad-hoc. Handlers can be any ```callable``` or a ```Class@Method``` style string.
+You may opt to bypass subscribers altogther and simply attach your own handlers ad-hoc. Handlers can be anything of type ```callable```.
 
 ```php
 $dispatcher = new Announce\Dispatcher;
@@ -208,23 +230,51 @@ $dispatcher->listen(MyEvent::class, "myEventHandler");
 $dispatcher->listen(MyOtherEvent::class, "App\\Subscribers\\FooSubscriber@barHandler");
 ```
 
-### Triggering events
+### Dispatching events
 
-To trigger an event in your code, simply call the ```trigger``` method on the ```Dispatcher``` with your ```Event``` instance.
+To dispatch (trigger) an event in your code, simply call the ```dispatch``` method on the ```Dispatcher``` with your ```Event``` instance.
 
 ```php
 $dispatcher = Container::get(Announce\Dispatcher::class);
-$dispatcher->trigger(new UserRegisteredEvent($user));
+$dispatcher->dispatch(new UserRegisteredEvent($user));
 ```
 
 ### Stopping event propagation
-If you need to stop event propagation during its lifetime, just call the ```stopPropagation()``` method on the event instance. The event will no longer be propagated to any subscribed listeners.
+If you need to stop event propagation during its lifetime, just call the ```stop()``` method on the event instance. The event will no longer be propagated to any subscribed listeners.
 
 ```php
 function eventHandler(UserRegisteredEvent $event)
 {
     Email::send("welcome")->to($event->user->email);
 
-    $event->stopPropagation();
+    $event->stop();
+}
+```
+
+### Broadcasting
+You may hook-in any custom code required to broadcast your event to any resource you wish by implementing the ```BroadcastableEvent``` interface. This interface defines a single method ```broadcast()``` with no parameters and a ```void``` return type.
+
+The dispatcher will automatically call the ```broadcast()``` method after all registered handlers have finished processing the event.
+
+```php
+class WidgetUpdatedEvent extends Annouce\Event implements Announce\BroadcastableEvent
+{
+    protected $widget;
+
+    public function __construct(Widget $widget)
+    {
+        $this->widget = $widget;
+    }
+
+    public function broadcast(): void
+    {
+        Container::get(SnsClient::class)->publish([
+            'Message' => [
+                'event' => $this->getName(),
+                'data' => $this->widget->serialize(),
+            ],
+            'TopicArn' => 'arn:aws:sns:us-west-2:038318100391:WidgetUpdated'
+        ]);
+    }
 }
 ```
