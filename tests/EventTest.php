@@ -2,69 +2,25 @@
 
 namespace Announce\Tests;
 
-use Announce\Dispatcher;
-use Announce\Event;
-use Announce\Subscriber;
+use Announce\Tests\src\Events\NamedEvent;
+use Announce\Tests\src\Events\TestEvent;
+use Announce\Tests\src\Subject;
 use PHPUnit\Framework\TestCase;
 
-class Test
-{
-    public $foo = false;
-}
-
-class TestEvent extends Event
-{
-    /**
-     * @var Test
-     */
-    public $test;
-
-    /**
-     * Test constructor
-     *
-     * @param Test $test
-     */
-    public function __construct(Test $test)
-    {
-        $this->test = $test;
-    }
-}
-
-class TestSubscriber extends Subscriber
-{
-    public function testHandler(TestEvent $testEvent)
-    {
-        $testEvent->test->foo = true;
-    }
-
-    public function register(Dispatcher $dispatcher): void
-    {
-        $dispatcher->listen(
-            TestEvent::class,
-            [$this, 'testHandler']
-        );
-    }
-}
-
 /**
- * @covers Announce\Dispatcher
  * @covers Announce\Event
- * @covers Announce\Subscriber
  */
 class EventTest extends TestCase
 {
-    public function test_event_subscription()
+    public function test_default_event_name()
     {
-        $dispatcher = new Dispatcher;
-        $dispatcher->register([
-            TestSubscriber::class,
-        ]);
+        $event = new TestEvent(new Subject);
+        $this->assertEquals(TestEvent::class, $event->getName());
+    }
 
-        $test = new Test;
-        $this->assertFalse($test->foo);
-
-        $dispatcher->trigger(new TestEvent($test));
-
-        $this->assertTrue($test->foo);
+    public function test_custom_event_name()
+    {
+        $event = new NamedEvent;
+        $this->assertEquals('named.event', $event->getName());
     }
 }

@@ -11,7 +11,14 @@ abstract class Subscriber
      * 
      * $dispatcher->listen(
      *      SomeEvent::class,
-     *      [$this, "someEventHandler"]
+     *      [$this, "someEventHandlerMethod"]
+     * );
+     * 
+     * Or register multiple events to a single handler.
+     * 
+     * $dispatcher->listen(
+     *      [SomeEvent::class, SomeOtherEvent::class],
+     *      [$this, "someEventHandlerMethod"]
      * );
      *
      * @param Dispatcher $dispatcher
