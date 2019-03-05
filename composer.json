@@ -1,6 +1,6 @@
 {
     "name": "nimbly\/announce",
-    "description": "Event dispatcher and subscribers",
+    "description": "PSR-14 event dispatcher and subscribers with support for broadcasting.",
     "version": "0.1.0",
     "type": "library",
     "license": "MIT",
