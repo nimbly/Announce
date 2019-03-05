@@ -1,5 +1,10 @@
 # Announce
 
+[![Latest Stable Version](https://img.shields.io/packagist/v/nimbly/Announce.svg?style=flat-square)](https://packagist.org/packages/nimbly/Announce)
+[![Build Status](https://img.shields.io/travis/nimbly/Announce.svg?style=flat-square)](https://travis-ci.org/nimbly/Announce)
+[![Code Coverage](https://img.shields.io/coveralls/github/nimbly/Announce.svg?style=flat-square)](https://coveralls.io/github/nimbly/Announce)
+[![License](https://img.shields.io/github/license/nimbly/Announce.svg?style=flat-square)](https://packagist.org/packages/nimbly/Announce)
+
 A simple framework agnostic PSR-14 event dispatcher for your event-driven application.
 
 ## Installation
