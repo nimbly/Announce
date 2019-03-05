@@ -47,7 +47,7 @@ class Dispatcher
      *
      * @param Event $event
      */
-    public function trigger(Event $event): void
+    public function trigger(Event $event, bool $shouldBroadcast = true): void
     {
         if( array_key_exists($event->getName(), $this->subscriptions) &&
             is_array($this->subscriptions[$event->getName()]) ){
@@ -64,6 +64,11 @@ class Dispatcher
 
                 call_user_func($handler, $event);
 
+                if( $shouldBroadcast &&
+                    $event instanceof Broadcaster ){
+
+                    call_user_func([$event, "broadcast"]);
+                }
             }
         }
     }
