@@ -188,6 +188,16 @@ You can also listen to more than one event for a single handler.
     );
 ```
 
+#### Wildcard listener
+You can register a handler to be called on **all** events announced by using an asterisk (*) for the event name.
+
+```php
+    $dispatcher->listen(
+        '*',
+        [$this, 'recalculateFoo']
+    );
+```
+
 ### Registering subscribers
 
 Before your subscribers' handlers can be called, they must be registered with the event ```Dispatcher```.
