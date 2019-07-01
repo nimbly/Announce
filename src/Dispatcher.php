@@ -28,7 +28,7 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
     public function register(array $subscribers): void
     {
         foreach( $subscribers as $subscriber ){
-            call_user_func([new $subscriber, 'register'], $this);
+            \call_user_func([new $subscriber, 'register'], $this);
         }
     }
 
@@ -40,7 +40,7 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
      */
     public function listen($eventName, callable $handler): void
     {
-        if( !is_array($eventName) ){
+        if( !\is_array($eventName) ){
             $eventName = [$eventName];
         }
 
@@ -60,7 +60,7 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
                 break;
             }
 
-            call_user_func($handler, $event);
+            \call_user_func($handler, $event);
         }
 
         $this->broadcastEvent($event);
@@ -77,10 +77,15 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
             $eventName = $event->getName();
         }
         else {
-            $eventName = get_class($event);
+            $eventName = \get_class($event);
         }
 
-        return $this->subscriptions[$eventName] ?? [];
+        $listeners = \array_merge(
+            $this->subscriptions[$eventName] ?? [],
+            $this->subscriptions['*'] ?? []
+        );
+
+        return $listeners;
     }
 
     /**
@@ -92,7 +97,7 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
     protected function broadcastEvent(object $event): void
     {
         if( $event instanceof BroadcastableEvent ){
-            call_user_func([$event, 'broadcast']);
+            \call_user_func([$event, 'broadcast']);
         }
     }
 

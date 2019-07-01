@@ -83,4 +83,23 @@ class DispatcherTest extends TestCase
 
         $this->assertTrue($test);
     }
+
+    public function test_wildcard_subscription()
+    {
+        $dispatcher = new Dispatcher;
+
+        $test = false;
+        $dispatcher->listen(
+            '*',
+            function(ObjectEvent $event) use (&$test) {
+
+                $test = true;
+
+            }
+        );
+
+        $dispatcher->dispatch(new ObjectEvent);
+
+        $this->assertTrue($test);
+    }
 }
