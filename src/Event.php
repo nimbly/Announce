@@ -10,7 +10,7 @@ abstract class Event implements StoppableEventInterface
     /**
      * Override default event name.
      *
-     * @var string
+     * @var string|null
      */
     protected $name;
 
