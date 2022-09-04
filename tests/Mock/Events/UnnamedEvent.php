@@ -1,25 +1,16 @@
 <?php
 
-namespace Announce\Tests\Mock\Events;
+namespace Nimbly\Announce\Tests\Mock\Events;
 
-use Announce\BroadcastableEvent;
-use Announce\Event;
-use Announce\Tests\Mock\Subject;
+use Nimbly\Announce\Event;
+use Nimbly\Announce\Tests\Mock\Subject;
 
 class UnnamedEvent extends Event
 {
     /**
-     * @var Subject
+     * @param Subject $subject
      */
-    public $subject;
-
-    /**
-     * Test constructor
-     *
-     * @param Subject $test
-     */
-    public function __construct(Subject $subject)
+    public function __construct(public Subject $subject)
     {
-        $this->subject = $subject;
     }
 }

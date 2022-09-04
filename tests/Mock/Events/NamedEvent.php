@@ -1,10 +1,10 @@
 <?php
 
-namespace Announce\Tests\Mock\Events;
+namespace Nimbly\Announce\Tests\Mock\Events;
 
-use Announce\Event;
+use Nimbly\Announce\Event;
 
 class NamedEvent extends Event
 {
-    protected $name = "named.event";
+    protected ?string $name = "named.event";
 }

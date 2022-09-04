@@ -1,6 +1,6 @@
 <?php
 
-namespace Announce\Tests\Mock\Events;
+namespace Nimbly\Announce\Tests\Mock\Events;
 
 class ObjectEvent
 {

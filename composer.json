@@ -6,27 +6,30 @@
     "authors": [
         {
             "name": "Brent Scheffler",
-            "email": "brent@nimbly.io"
+            "email": "brent@brentscheffler.com"
         }
     ],
     "require": {
-        "php": ">=7.2",
-        "psr/event-dispatcher": "^1.0"
+        "php": ">=8.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/container": "^1.1",
+        "nimbly/resolve": "^1.0"
     },
     "autoload": {
         "psr-4": {
-            "Announce\\": "src/"
+            "Nimbly\\Announce\\": "src/"
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.0",
-        "vimeo/psalm": "^3.1",
+        "phpunit/phpunit": "^9.5",
+        "vimeo/psalm": "^4",
         "php-coveralls/php-coveralls": "^2.1",
-        "phploc/phploc": "^5.0"
+        "symfony/var-dumper": "^6.0",
+        "nimbly/carton": "^1.2"
     },
     "autoload-dev": {
         "psr-4": {
-            "Announce\\Tests\\": "tests/"
+            "Nimbly\\Announce\\Tests\\": "tests/"
         }
     }
 }
