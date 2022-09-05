@@ -2,7 +2,6 @@
 
 namespace Nimbly\Announce;
 
-use DomainException;
 use Nimbly\Announce\Event;
 use Nimbly\Resolve\Resolve;
 use Psr\Container\ContainerInterface;
@@ -34,7 +33,7 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 	 * @param ContainerInterface|null $container
 	 */
 	public function __construct(
-		array $subscribers,
+		array $subscribers = [],
 		?ContainerInterface $container = null)
 	{
 		$this->resolve = new Resolve($container);
@@ -61,27 +60,33 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 
 			$reflectionMethods = $reflectionClass->getMethods();
 
+			if( empty($reflectionMethods) ){
+				throw new UnexpectedValueException("Given subscriber has no methods: " . $reflectionClass->getName());
+			}
+
 			foreach( $reflectionMethods as $reflectionMethod ){
 
 				$reflectionAttributes = $reflectionMethod->getAttributes(Subscribe::class);
 
 				if( empty($reflectionAttributes) ){
-					throw new DomainException("A subscriber was given with no Subscribe attributes.");
+					throw new UnexpectedValueException("A subscriber was given with no Subscribe attributes: " . $reflectionClass->getName());
 				}
 
 				foreach( $reflectionAttributes as $reflectionAttribute ) {
+
+					if( !$reflectionMethod->isPublic() ){
+						throw new UnexpectedValueException("Event handler methods must be public.");
+					}
 
 					/**
 					 * @var Subscribe $subscription
 					 */
 					$subscription = $reflectionAttribute->newInstance();
 
-					foreach( $subscription->getEvents() as $event ){
-						$this->subscriptions[$event][] = [
-							$subscriberInstance,
-							$reflectionMethod->getName()
-						];
-					}
+					$this->listen(
+						$subscription->getEvents(),
+						[$subscriberInstance, $reflectionMethod->getName()]
+					);
 				}
 			}
 		}
@@ -106,39 +111,19 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 
 	/**
 	 * @inheritDoc
-	 */
-	public function dispatch(object $event): object
-	{
-		foreach( $this->getListenersForEvent($event) as $handler ){
-
-			if( $this->shouldPropagationStop($event) ){
-				break;
-			}
-
-			$this->resolve->call(
-				$handler,
-				[\get_class($event) => $event]
-			);
-		}
-
-		return $event;
-	}
-
-	/**
-	 * @inheritDoc
 	 * @return array<callable>
 	 */
 	public function getListenersForEvent(object $event): iterable
 	{
 		if( $event instanceof Event ){
-			$eventName = $event->getName();
+			$event_name = $event->getName();
 		}
 		else {
-			$eventName = \get_class($event);
+			$event_name = \get_class($event);
 		}
 
 		$listeners = \array_merge(
-			$this->subscriptions[$eventName] ?? [],
+			$this->subscriptions[$event_name] ?? [],
 			$this->subscriptions["*"] ?? []
 		);
 
@@ -158,5 +143,25 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 		}
 
 		return false;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function dispatch(object $event): object
+	{
+		foreach( $this->getListenersForEvent($event) as $handler ){
+
+			if( $this->shouldPropagationStop($event) ){
+				break;
+			}
+
+			$this->resolve->call(
+				$handler,
+				[\get_class($event) => $event]
+			);
+		}
+
+		return $event;
 	}
 }

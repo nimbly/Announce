@@ -3,20 +3,20 @@
 namespace Nimbly\Announce\Tests\Mock\Subscribers;
 
 use Nimbly\Announce\Subscribe;
-use Nimbly\Announce\Tests\Mock\Events\UnnamedEvent;
+use Nimbly\Announce\Tests\Mock\Events\NamedEvent;
+use Nimbly\Announce\Tests\Mock\Events\StandardEvent;
 
 class TestSubscriber
 {
-	#[Subscribe(UnnamedEvent::class)]
-	public function shouldStopPropagation(UnnamedEvent $testEvent)
+	#[Subscribe(NamedEvent::class)]
+	public function onNamedEvent(NamedEvent $event): void
 	{
-		$testEvent->subject->flag = true;
-		$testEvent->stop();
+		$event->status = "processed";
 	}
 
-	#[Subscribe(UnnamedEvent::class)]
-	public function convertNameToUppercase(UnnamedEvent $testEvent)
+	#[Subscribe(StandardEvent::class)]
+	public function onUnnamedEvent(StandardEvent $event): void
 	{
-		$testEvent->subject->name = strtoupper($testEvent->subject->name);
+		$event->status = "processed";
 	}
 }

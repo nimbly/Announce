@@ -43,6 +43,7 @@ class UserRegisteredEvent extends Event
 ```
 
 ### Create a subscriber
+
 Subscribers are classes that will handle your events. You can have as many subscribers as you would like.
 
 To register a subscriber's method to handle a particular event or set of events, use the `Nimbly\Announce\Subscribe` attribute and pass in a comma separated list of event names to listen for.
@@ -109,4 +110,18 @@ class EmailSubscriber
         $event->stop();
     }
 }
+```
+
+### Registering individual listeners
+
+Alternatively, you can register individual events using the `listen` method.
+
+```php
+$dispatcher = new Dispatcher;
+$dispatcher->listen(
+    UserRegisteredEvent::class,
+    function(UserRegisteredEvent $event): void {
+        // do some event stuff
+    }
+);
 ```

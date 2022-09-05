@@ -3,6 +3,7 @@
 namespace Announce\Tests;
 
 use Nimbly\Announce\Tests\Mock\Events\NamedEvent;
+use Nimbly\Announce\Tests\Mock\Events\StandardEvent;
 use Nimbly\Announce\Tests\Mock\Events\UnnamedEvent;
 use Nimbly\Announce\Tests\Mock\Subject;
 use PHPUnit\Framework\TestCase;
@@ -14,8 +15,8 @@ class EventTest extends TestCase
 {
     public function test_default_event_name()
     {
-        $event = new UnnamedEvent(new Subject);
-        $this->assertEquals(UnnamedEvent::class, $event->getName());
+        $event = new StandardEvent;
+        $this->assertEquals(StandardEvent::class, $event->getName());
     }
 
     public function test_custom_event_name()
