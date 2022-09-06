@@ -4,8 +4,6 @@ namespace Announce\Tests;
 
 use Nimbly\Announce\Tests\Mock\Events\NamedEvent;
 use Nimbly\Announce\Tests\Mock\Events\StandardEvent;
-use Nimbly\Announce\Tests\Mock\Events\UnnamedEvent;
-use Nimbly\Announce\Tests\Mock\Subject;
 use PHPUnit\Framework\TestCase;
 
 /**
