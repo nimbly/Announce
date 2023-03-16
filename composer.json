@@ -13,7 +13,7 @@
         "php": ">=8.0",
         "psr/event-dispatcher": "^1.0",
         "psr/container": "^1.1",
-        "nimbly/resolve": "^1.0"
+        "nimbly/resolve": "^2.0"
     },
     "autoload": {
         "psr-4": {

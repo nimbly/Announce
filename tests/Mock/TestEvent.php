@@ -1,11 +1,11 @@
 <?php
 
-namespace Nimbly\Announce\Tests\Mock\Events;
+namespace Nimbly\Announce\Tests\Mock;
 
 use DateTime;
-use Nimbly\Announce\Event;
+use Nimbly\Announce\StoppableEvent;
 
-class StandardEvent extends Event
+class TestEvent extends StoppableEvent
 {
 	public function __construct(
 		public string $status = "pending",

@@ -9,9 +9,9 @@ A simple framework agnostic PSR-14 event dispatcher for your event-driven applic
 
 ## Features
 
-* Uses PHP's `#Attribute` feature to register class methods as event handlers.
-* Optional PSR-11 Container support.
-* Full autowiring support for your subscribers.
+* Uses PHP's `#Attribute` feature to register class methods as event handlers
+* Optional PSR-11 Container support
+* Full autowiring support for your subscribers and listeners - pass in not just the event but any needed services or other dependencies!
 
 ## Installation
 
@@ -23,10 +23,7 @@ composer require nimbly/announce
 
 ### Create an event class
 
-Your events can be standalone classes or they can extend the `Event` abstract class. By extending the `Event` abstract you gain the ability to:
-
-* Stop event propogation if needed
-* Customizable event names (defaults to fully qualified class namespace)
+Your events can be standalone classes or they can extend the `StoppableEvent` abstract class. By extending the `StoppableEvent` abstract you gain the ability to stop event propogation if needed.
 
 ```php
 namespace App\Events;
@@ -34,11 +31,11 @@ namespace App\Events;
 use App\Models\User;
 use Nimbly\Announce\Event;
 
-class UserRegisteredEvent extends Event
+class UserRegisteredEvent extends StoppableEvent
 {
-    public function __construct(public User $user)
-    {
-    }
+	public function __construct(public User $user)
+	{
+	}
 }
 ```
 
@@ -57,13 +54,13 @@ use Nimbly\Announce\Subscribe;
 
 class EmailSubscriber
 {
-    #[Subscribe(UserRegisteredEvent::class)]
-    public function onUserRegistered(
-        UserRegisteredEvent $event,
-        EmailService $emailService): void
-    {
-        $emailService->send("registration_email", $event->user->email);
-    }
+	#[Subscribe(UserRegisteredEvent::class)]
+	public function onUserRegistered(
+		UserRegisteredEvent $event,
+		EmailService $emailService): void
+	{
+		$emailService->send("registration_email", $event->user->email);
+	}
 }
 ```
 
@@ -75,11 +72,11 @@ You can also pass in a PSR-11 compliant container instance to be used in autowir
 
 ```php
 $dispatcher = new Dispatcher(
-    subscribers: [
-        EmailSubscriber::class,
-        new FooSubscriber,
-    ],
-    container: $container
+	subscribers: [
+		EmailSubscriber::class,
+		new FooSubscriber,
+	],
+	container: $container
 );
 ```
 
@@ -94,21 +91,21 @@ $dispatcher->dispatch($event);
 
 ### Stopping event propagation
 
-If you need to stop event propagation during its lifetime, just call the `stop()` method on the event instance. The event will no longer be propagated to any further subscribed listeners.
+If you need to stop event propagation during its lifetime, just call the `stop()` method on the event instance. The event will no longer be propagated to any further subscribed listeners. This requires the event to extend from the `StoppableEvent` abstract.
 
 ```php
 class EmailSubscriber
 {
-    #[Subscribe(UserRegisteredEvent::class)]
-    public function onUserRegistered(
-        UserRegisteredEvent $event,
-        EmailService $emailService): void
-    {
-        $emailService->send("registration_email", $event->user->email);
+	#[Subscribe(UserRegisteredEvent::class)]
+	public function onUserRegistered(
+		UserRegisteredEvent $event,
+		EmailService $emailService): void
+	{
+		$emailService->send("registration_email", $event->user->email);
 
-        // Prevent any further handlers from processing this event
-        $event->stop();
-    }
+		// Prevent any further handlers from processing this event
+		$event->stop();
+	}
 }
 ```
 
@@ -119,9 +116,9 @@ Alternatively, you can register individual events using the `listen` method.
 ```php
 $dispatcher = new Dispatcher;
 $dispatcher->listen(
-    UserRegisteredEvent::class,
-    function(UserRegisteredEvent $event): void {
-        // do some event stuff
-    }
+	UserRegisteredEvent::class,
+	function(UserRegisteredEvent $event): void {
+		// do some event stuff
+	}
 );
 ```

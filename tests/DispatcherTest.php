@@ -5,12 +5,10 @@ namespace Announce\Tests;
 use Carton\Container;
 use DateTime;
 use Nimbly\Announce\Dispatcher;
+use Nimbly\Announce\StoppableEvent;
 use Nimbly\Announce\Subscribe;
-use Nimbly\Announce\Tests\Mock\Events\NamedEvent;
-use Nimbly\Announce\Tests\Mock\Events\ObjectEvent;
-use Nimbly\Announce\Tests\Mock\Events\StandardEvent;
-use Nimbly\Announce\Tests\Mock\Subscribers\TestSubscriber;
-use Nimbly\Resolve\Resolve;
+use Nimbly\Announce\Tests\Mock\TestEvent;
+use Nimbly\Announce\Tests\Mock\TestSubscriber;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use UnexpectedValueException;
@@ -18,7 +16,7 @@ use UnexpectedValueException;
 /**
  * @covers Nimbly\Announce\Dispatcher
  * @covers Nimbly\Announce\Subscribe
- * @covers Nimbly\Announce\Event
+ * @covers Nimbly\Announce\StoppableEvent
  */
 class DispatcherTest extends TestCase
 {
@@ -36,14 +34,14 @@ class DispatcherTest extends TestCase
 
 		$subscriptions = $reflectionProperty->getValue($dispatcher);
 
-		$this->assertArrayHasKey(NamedEvent::class, $subscriptions);
-		$this->assertArrayHasKey(StandardEvent::class, $subscriptions);
+		$this->assertArrayHasKey(TestEvent::class, $subscriptions);
+		$this->assertArrayHasKey(StoppableEvent::class, $subscriptions);
 
-		$this->assertCount(1, $subscriptions[NamedEvent::class]);
-		$this->assertCount(1, $subscriptions[StandardEvent::class]);
+		$this->assertCount(1, $subscriptions[TestEvent::class]);
+		$this->assertCount(1, $subscriptions[StoppableEvent::class]);
 
-		$this->assertIsCallable($subscriptions[NamedEvent::class][0]);
-		$this->assertIsCallable($subscriptions[StandardEvent::class][0]);
+		$this->assertIsCallable($subscriptions[TestEvent::class][0]);
+		$this->assertIsCallable($subscriptions[StoppableEvent::class][0]);
 	}
 
 	public function test_container_in_constructor(): void
@@ -55,20 +53,10 @@ class DispatcherTest extends TestCase
 		);
 
 		$reflectionClass = new ReflectionClass($dispatcher);
-		$reflectionProperty = $reflectionClass->getProperty("resolve");
-		$reflectionProperty->setAccessible(true);
-
-		$resolve = $reflectionProperty->getValue($dispatcher);
-
-		$this->assertInstanceOf(Resolve::class, $resolve);
-
-		$reflectionClass = new ReflectionClass($resolve);
 		$reflectionProperty = $reflectionClass->getProperty("container");
 		$reflectionProperty->setAccessible(true);
-
-		$resolveContainer = $reflectionProperty->getValue($resolve);
-
-		$this->assertSame($container, $resolveContainer);
+		$dispatcherContainer = $reflectionProperty->getValue($dispatcher);
+		$this->assertSame($container, $dispatcherContainer);
 	}
 
 	public function test_non_class_subscriber_in_constructor_throws_exception(): void
@@ -89,21 +77,6 @@ class DispatcherTest extends TestCase
 		$dispatcher = new Dispatcher(
 			subscribers: [
 				new class {}
-			]
-		);
-	}
-
-	public function test_subscriber_in_constructor_with_no_subscibe_attributes_throws_exception(): void
-	{
-		$this->expectException(UnexpectedValueException::class);
-
-		$dispatcher = new Dispatcher(
-			subscribers: [
-				new class {
-					public function onFoo($event): void {
-						echo $event;
-					}
-				}
 			]
 		);
 	}
@@ -166,45 +139,61 @@ class DispatcherTest extends TestCase
 		$this->assertIsCallable($subscriptions["BarEvent"][0]);
 	}
 
-	public function test_get_listeners_for_event_with_event_abstract(): void
+	public function test_get_listeners_for_event(): void
 	{
-		$callback = function(StandardEvent $event): void {
+		$callback = function(TestEvent $event): void {
 			$event->status = "processed";
 		};
 
 		$dispatcher = new Dispatcher;
 		$dispatcher->listen(
-			StandardEvent::class,
+			TestEvent::class,
 			$callback
 		);
 
-		$listeners = $dispatcher->getListenersForEvent(new StandardEvent);
+		$dispatcher->listen(
+			DateTime::class,
+			$callback
+		);
+
+		$listeners = $dispatcher->getListenersForEvent(new TestEvent);
 
 		$this->assertCount(1, $listeners);
 		$this->assertSame($callback, $listeners[0]);
 	}
 
-	public function test_get_listeners_with_object_event(): void
+	public function test_get_listeners_for_event_checks_instanceof(): void
 	{
-		$callback = function(ObjectEvent $event): void {
+		$callback = function(TestEvent $event): void {
 			$event->status = "processed";
 		};
 
 		$dispatcher = new Dispatcher;
 		$dispatcher->listen(
-			ObjectEvent::class,
+			TestEvent::class,
 			$callback
 		);
 
-		$listeners = $dispatcher->getListenersForEvent(new ObjectEvent);
+		$dispatcher->listen(
+			StoppableEvent::class,
+			$callback
+		);
 
-		$this->assertCount(1, $listeners);
+		$dispatcher->listen(
+			DateTime::class,
+			$callback
+		);
+
+		$listeners = $dispatcher->getListenersForEvent(new TestEvent);
+
+		$this->assertCount(2, $listeners);
 		$this->assertSame($callback, $listeners[0]);
+		$this->assertSame($callback, $listeners[1]);
 	}
 
 	public function test_should_propagation_stop_for_event_abstract(): void
 	{
-		$event = new StandardEvent;
+		$event = new TestEvent;
 
 		$dispatcher = new Dispatcher;
 		$reflectionClass = new ReflectionClass($dispatcher);
@@ -224,7 +213,7 @@ class DispatcherTest extends TestCase
 
 	public function test_should_propagation_stop_for_generic_event_returns_false(): void
 	{
-		$event = new ObjectEvent;
+		$event = new TestEvent;
 
 		$dispatcher = new Dispatcher;
 		$reflectionClass = new ReflectionClass($dispatcher);
@@ -240,13 +229,13 @@ class DispatcherTest extends TestCase
 	{
 		$dispatcher = new Dispatcher;
 		$dispatcher->listen(
-			StandardEvent::class,
-			function(StandardEvent $event): void {
+			TestEvent::class,
+			function(TestEvent $event): void {
 				$event->status = "processed";
 			}
 		);
 
-		$event = new StandardEvent;
+		$event = new TestEvent;
 		$dispatcher->dispatch($event);
 
 		$this->assertEquals(
@@ -260,20 +249,20 @@ class DispatcherTest extends TestCase
 		$dispatcher = new Dispatcher;
 
 		$dispatcher->listen(
-			StandardEvent::class,
-			function(StandardEvent $event): void {
+			TestEvent::class,
+			function(TestEvent $event): void {
 				$event->status = "processed";
 			}
 		);
 
 		$dispatcher->listen(
-			StandardEvent::class,
-			function(StandardEvent $event): void {
+			TestEvent::class,
+			function(TestEvent $event): void {
 				$event->status = "foo";
 			}
 		);
 
-		$event = new StandardEvent;
+		$event = new TestEvent;
 		$event->stop();
 
 		$dispatcher->dispatch($event);
@@ -295,8 +284,8 @@ class DispatcherTest extends TestCase
 		$dispatcher = new Dispatcher(
 			subscribers: [
 				new class {
-					#[Subscribe(StandardEvent::class)]
-					public function onDateUpdated(StandardEvent $event, DateTime $date): void {
+					#[Subscribe(TestEvent::class)]
+					public function onDateUpdated(TestEvent $event, DateTime $date): void {
 						$event->occured_at = $date;
 					}
 				}
@@ -304,7 +293,7 @@ class DispatcherTest extends TestCase
 			container: $container
 		);
 
-		$event = new StandardEvent;
+		$event = new TestEvent;
 
 		$dispatcher->dispatch($event);
 
