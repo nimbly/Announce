@@ -1,8 +1,5 @@
 name: PHP Composer
 
-env:
- COVERALLS_REPO_TOKEN: ZrqVT0pzfK5RsiDsttL5ia4lJ2DDCt3EZ
-
 on:
   push:
     branches: [ "master" ]
@@ -45,5 +42,7 @@ jobs:
       run: make coverage
 
     - name: Upload test coverage
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: vendor/bin/php-coveralls -vvv
 
