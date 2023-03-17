@@ -37,10 +37,10 @@ jobs:
 
     - name: Run static analysis
       run: make analyze
-      
+
     - name: Run test suite
       run: make coverage
-      
+
     - name: Upload test coverage
-      run: vendor/bin/php-coveralls
+      run: php vendor/bin/php-coveralls
 
