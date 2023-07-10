@@ -1,9 +1,11 @@
 # Announce
 
 [![Latest Stable Version](https://img.shields.io/packagist/v/nimbly/Announce.svg?style=flat-square)](https://packagist.org/packages/nimbly/Announce)
-[![Build Status](https://img.shields.io/travis/nimbly/Announce.svg?style=flat-square)](https://travis-ci.org/nimbly/Announce)
-[![Code Coverage](https://img.shields.io/coveralls/github/nimbly/Announce.svg?style=flat-square)](https://coveralls.io/github/nimbly/Announce)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/nimbly/announce/php.yml?style=flat-square)](https://github.com/nimbly/Announce/actions/workflows/php.yml)
+[![Codecov branch](https://img.shields.io/codecov/c/github/nimbly/announce/master?style=flat-square)](https://app.codecov.io/github/nimbly/Announce)
 [![License](https://img.shields.io/github/license/nimbly/Announce.svg?style=flat-square)](https://packagist.org/packages/nimbly/Announce)
+
+
 
 A simple framework agnostic PSR-14 event dispatcher for your event-driven application.
 
@@ -119,6 +121,20 @@ $dispatcher->listen(
 	UserRegisteredEvent::class,
 	function(UserRegisteredEvent $event): void {
 		// do some event stuff
+	}
+);
+```
+
+### Wildcard listeners
+
+You can register a "wild card" listener by using the `*` event name. This will subscribe to *all* events fired.
+
+```php
+$dispatcher = new Dispatcher;
+$dispatcher->listen(
+	"*",
+	function($event): void {
+		// Respond to all events...
 	}
 );
 ```

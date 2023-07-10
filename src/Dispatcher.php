@@ -2,6 +2,8 @@
 
 namespace Nimbly\Announce;
 
+use Nimbly\Resolve\ClassResolutionException;
+use Nimbly\Resolve\ParameterResolutionException;
 use Nimbly\Resolve\Resolve;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -27,6 +29,9 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 	 *
 	 * @param array<class-string|object> $subscribers
 	 * @param ContainerInterface|null $container
+	 * @throws UnexpectedValueException
+	 * @throws ClassResolutionException
+	 * @throws ParameterResolutionException
 	 */
 	public function __construct(
 		array $subscribers = [],
@@ -46,10 +51,9 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 				);
 			}
 
-			/**
-			 * Create an instance of the subscriber to use.
-			 */
-			$subscriberInstance = $this->make($reflectionClass->getName(), $this->container);
+			if( !\is_object($subscriber) ) {
+				$subscriber = $this->make($reflectionClass->getName(), $this->container);
+			}
 
 			$reflectionMethods = $reflectionClass->getMethods();
 
@@ -74,7 +78,7 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 
 					$this->listen(
 						$subscription->getEvents(),
-						[$subscriberInstance, $reflectionMethod->getName()]
+						[$subscriber, $reflectionMethod->getName()]
 					);
 				}
 			}
