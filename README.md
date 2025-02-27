@@ -13,7 +13,7 @@ A simple framework agnostic PSR-14 event dispatcher for your event-driven applic
 
 * Uses PHP's `#Attribute` feature to register class methods as event handlers
 * Optional PSR-11 Container support
-* Full autowiring support for your subscribers and listeners - pass in not just the event but any needed services or other dependencies!
+* Full autowiring support for your subscribers and listeners - Announce will inject not just the event but any needed services or other dependencies from your container!
 
 ## Installation
 
@@ -94,6 +94,14 @@ $dispatcher->dispatch($event);
 ### Stopping event propagation
 
 If you need to stop event propagation during its lifetime, just call the `stop()` method on the event instance. The event will no longer be propagated to any further subscribed listeners. This requires the event to extend from the `StoppableEvent` abstract.
+
+```php
+class UserRegisteredEvent extends StoppableEvent
+{
+	public function __construct(public User $user)
+	{}
+}
+```
 
 ```php
 class EmailSubscriber
