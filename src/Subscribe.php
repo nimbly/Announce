@@ -17,7 +17,7 @@ class Subscribe
 	/**
 	 * @param string ...$events Event names to subscribe to.
 	 */
-	public function __construct(...$events)
+	public function __construct(string ...$events)
 	{
 		$this->events = $events;
 	}

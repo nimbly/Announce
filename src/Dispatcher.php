@@ -71,9 +71,6 @@ class Dispatcher implements EventDispatcherInterface, ListenerProviderInterface
 						throw new UnexpectedValueException("Event handler methods must be public.");
 					}
 
-					/**
-					 * @var Subscribe $subscription
-					 */
 					$subscription = $reflectionAttribute->newInstance();
 
 					$this->listen(

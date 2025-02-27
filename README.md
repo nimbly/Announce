@@ -1,7 +1,7 @@
 # Announce
 
 [![Latest Stable Version](https://img.shields.io/packagist/v/nimbly/Announce.svg?style=flat-square)](https://packagist.org/packages/nimbly/Announce)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/nimbly/announce/php.yml?style=flat-square)](https://github.com/nimbly/Announce/actions/workflows/php.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/nimbly/announce/coverage.yml?style=flat-square)](https://github.com/nimbly/Announce/actions/workflows/coverage.yml)
 [![Codecov branch](https://img.shields.io/codecov/c/github/nimbly/announce/master?style=flat-square)](https://app.codecov.io/github/nimbly/Announce)
 [![License](https://img.shields.io/github/license/nimbly/Announce.svg?style=flat-square)](https://packagist.org/packages/nimbly/Announce)
 
